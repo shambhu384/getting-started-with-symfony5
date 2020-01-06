@@ -30,7 +30,11 @@ class CustomerController
         $uuid =  uuid_create(UUID_TYPE_RANDOM);
         $customer = new Customer($uuid);
 
-        $customer = $serializer->deserialize($request->getContent(), Customer::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $customer]);
+        $customer = $serializer->deserialize(
+            $request->getContent(),
+            Customer::class, 'json',
+            [AbstractNormalizer::OBJECT_TO_POPULATE => $customer]
+        );
         $errors = $validator->validate($customer);
 
         if (count($errors) > 0) {
@@ -41,10 +45,11 @@ class CustomerController
         $message = new CreateCustomer($customer);
         $bus->dispatch($message);
 
-        return new Response(
-            $serializer->serialize($customer, 'json', ['groups' => ['private']]),
+        return new JsonResponse(
+            $serializer->serialize($customer, 'json'),
             Response::HTTP_CREATED,
-            ['Content-Type' => 'application/json']
+            [],
+            true
         );
     }
 
@@ -62,10 +67,11 @@ class CustomerController
             return new JsonResponse(null, Response::HTTP_NOT_FOUND);
         }
 
-        return new Response(
-            $serializer->serialize($customer, 'json', ['groups' => ['private']]),
+        return new JsonResponse(
+            $serializer->serialize($customer, 'json'),
             Response::HTTP_OK,
-            ['Content-Type' => 'application/json']
+            [],
+            true
         );
     }
 }
